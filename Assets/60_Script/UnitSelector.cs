@@ -30,8 +30,10 @@ public class UnitSelector : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        // 移動中は移動処理以外何もできない
         if(mySelectStatus == UnitSelectStatus.Moving)
         {
+            //FIXME:Z方向だと目的地の1マス手前で移動が終わってしまう。
             var diff = Time.time - _moveStartTime;
             if (diff > _time)
             {
