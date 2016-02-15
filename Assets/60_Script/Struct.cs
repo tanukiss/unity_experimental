@@ -33,6 +33,7 @@ namespace Commons
     {
         Neutral,
         Selected,
+        Moving,
         AfterMoved,
         MenuOpened,
     }

@@ -11,9 +11,15 @@ public class UnitSelector : MonoBehaviour {
     Point myPoint;
     int moveCost = 3;
     Transform selectedUnit;
+    
 
     List<Point> selectedPoints = new List<Point>();
     Dictionary<Point, Tile> tileList = new Dictionary<Point, Tile>();
+
+    float _moveStartTime;
+    Vector3 _moveDst;
+    Vector3 _moveSrc;
+    float _time = 1.0f;
 
     // Use this for initialization
     void Start () {
@@ -23,6 +29,21 @@ public class UnitSelector : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        if(mySelectStatus == UnitSelectStatus.Moving)
+        {
+            var diff = Time.time - _moveStartTime;
+            if (diff > _time)
+            {
+                mySelectStatus = UnitSelectStatus.Neutral;
+            }
+            else
+            {
+                var rate = diff / _time;
+                selectedUnit.position = Vector3.Lerp(_moveSrc, _moveDst, rate);
+                return;
+            }
+        }
 
         // マップクリック時
         if (Input.GetMouseButtonUp(0))
@@ -55,10 +76,16 @@ public class UnitSelector : MonoBehaviour {
                             //TODO:そのタイルの座標へ移動する
                             if (hit.collider.GetComponent<Renderer>().enabled)
                             {
+                                mySelectStatus = UnitSelectStatus.Moving;
+
                                 Vector3 movedPos = hit.transform.position;
                                 movedPos.y = 1.5f;
-                                selectedUnit.position = movedPos;
-                                selectedClear = true;
+
+                                _moveStartTime = Time.time;
+                                _moveSrc = selectedUnit.position;
+                                _moveDst = movedPos;
+
+                                this.clearMovableTile(false);
                             } else
                             {
                                 selectedClear = true;
@@ -72,24 +99,32 @@ public class UnitSelector : MonoBehaviour {
 
                         if(selectedClear)
                         {
-                            this.mySelectStatus = UnitSelectStatus.Neutral;
-                            selectedUnit = null;
-
-                            // タイルの選択状態をクリア
-                            Dictionary<Point, Tile> tileList = TileManager.getTileList();
-                            foreach (Point point in selectedPoints)
-                            {
-                                if (tileList.ContainsKey(point))
-                                {
-                                    Transform tile = tileList[point].trans.FindChild("Plane");
-                                    tile.GetComponent<Renderer>().enabled = false;
-                                }
-                            }
+                            clearMovableTile(true);
                         }
                     }
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    private void clearMovableTile(bool isResetUnitStatus)
+    {
+        if (isResetUnitStatus)
+        {
+            this.mySelectStatus = UnitSelectStatus.Neutral;
+            selectedUnit = null;
+        }
+
+        // タイルの選択状態をクリア
+        Dictionary<Point, Tile> tileList = TileManager.getTileList();
+        foreach (Point point in selectedPoints)
+        {
+            if (tileList.ContainsKey(point))
+            {
+                Transform tile = tileList[point].trans.FindChild("Plane");
+                tile.GetComponent<Renderer>().enabled = false;
             }
         }
     }
