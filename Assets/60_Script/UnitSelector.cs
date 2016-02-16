@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Commons;
+using System;
 
 public class UnitSelector : MonoBehaviour {
 
@@ -23,8 +24,8 @@ public class UnitSelector : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        myPoint.x = (int)self.position.x;
-        myPoint.z = (int)self.position.z;
+        myPoint.x = (int)Math.Round(self.position.x, MidpointRounding.AwayFromZero);
+        myPoint.z = (int)Math.Round(self.position.z, MidpointRounding.AwayFromZero);
     }
 	
 	// Update is called once per frame
@@ -33,11 +34,14 @@ public class UnitSelector : MonoBehaviour {
         // 移動中は移動処理以外何もできない
         if(mySelectStatus == UnitSelectStatus.Moving)
         {
-            //FIXME:Z方向だと目的地の1マス手前で移動が終わってしまう。
             var diff = Time.time - _moveStartTime;
+            // 目的地に着いた
             if (diff > _time)
             {
+                myPoint.x = (int)Math.Round(_moveDst.x, MidpointRounding.AwayFromZero);
+                myPoint.z = (int)Math.Round(_moveDst.z, MidpointRounding.AwayFromZero);
                 mySelectStatus = UnitSelectStatus.Neutral;
+
             }
             else
             {
@@ -75,7 +79,7 @@ public class UnitSelector : MonoBehaviour {
                         bool selectedClear = false;
                         if (Physics.Raycast(ray, out hit, 1000000, 1 << 9))
                         {
-                            //TODO:そのタイルの座標へ移動する
+                            // そのタイルの座標へ移動する
                             if (hit.collider.GetComponent<Renderer>().enabled)
                             {
                                 mySelectStatus = UnitSelectStatus.Moving;
@@ -141,8 +145,9 @@ public class UnitSelector : MonoBehaviour {
         selectedPoints.Clear();
 
         int leftCost = moveCost;
-        myPoint.x = (int)self.position.x;
-        myPoint.z = (int)self.position.z;
+        
+        myPoint.x = (int)Math.Round(self.position.x, MidpointRounding.AwayFromZero);
+        myPoint.z = (int)Math.Round(self.position.z, MidpointRounding.AwayFromZero);
         this.searchDirection(myPoint, Direction.North, leftCost);
 
         leftCost = moveCost;
