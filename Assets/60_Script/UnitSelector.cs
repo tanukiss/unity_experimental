@@ -10,7 +10,7 @@ public class UnitSelector : MonoBehaviour {
 
     UnitSelectStatus mySelectStatus = UnitSelectStatus.Neutral;
     Point myPoint;
-    int moveCost = 3;
+    int moveCost = 4;
     Transform selectedUnit;
     
 
